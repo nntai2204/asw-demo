@@ -6,6 +6,8 @@ import com.tainnt.awsdemo.models.FileRequest;
 import com.tainnt.awsdemo.models.FileResponse;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/file")
 public class FileController {
@@ -20,8 +22,8 @@ public class FileController {
     }
 
     @PostMapping("/read")
-    public FileResponse readFile(@RequestBody String filePath) {
-        return FileReadExample.readFromFile(filePath);
+    public FileResponse readFile(@RequestBody FileRequest filePath) throws IOException {
+        return FileReadExample.readFromFile(filePath.getFileName());
     }
 }
 
