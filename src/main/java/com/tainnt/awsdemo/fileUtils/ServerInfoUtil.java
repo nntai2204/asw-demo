@@ -1,16 +1,27 @@
 package com.tainnt.awsdemo.fileUtils;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.*;
+import java.util.Enumeration;
 
 public class ServerInfoUtil {
     public static String getLocalIp() {
         try {
-            InetAddress ip = InetAddress.getLocalHost();
-            return ip.getHostAddress();
-        } catch (UnknownHostException e) {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface ni = interfaces.nextElement();
+                if (!ni.isUp() || ni.isLoopback() || ni.isVirtual()) continue;
+
+                Enumeration<InetAddress> addresses = ni.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    if (addr instanceof Inet4Address && !addr.isLoopbackAddress() && !addr.isLinkLocalAddress()) {
+                        return addr.getHostAddress(); // ✅ IP hợp lệ
+                    }
+                }
+            }
+        } catch (SocketException e) {
             e.printStackTrace();
-            return "Không thể lấy IP";
         }
+        return "Không tìm thấy IP hợp lệ";
     }
 }
