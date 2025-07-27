@@ -1,7 +1,7 @@
 package com.tainnt.awsdemo.fileUtils;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.*;
+import java.util.Enumeration;
 
 public class ServerInfoUtil {
     public static String getLocalIp() {
