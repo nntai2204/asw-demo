@@ -25,10 +25,14 @@ pipeline {
             steps {
                 sshagent(['jenkins-ssh-key']) {
                     sh '''
-                    ssh vm1@192.168.1.186 '
+                      ssh vm1@192.168.1.186 <<EOF
+                        echo "=== Killing old process..."
                         pkill -f aws-demo.jar || true
-                        nohup java -jar /home/vm1/aws-demo.jar > /home/vm1/aws-demo.log 2>&1 &
-                    '
+
+                        echo "=== Starting new process..."
+                        nohup DB_PASSWORD=123456 java -jar /home/vm1/aws-demo.jar > /home/vm1/aws-demo.log 2>&1 &
+                        echo "=== Process started ==="
+                      EOF
                     '''
                 }
             }
