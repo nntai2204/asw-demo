@@ -10,7 +10,6 @@ pipeline {
 
         stage('Build project') {
             steps {
-                sh 'chmod +x mvnw'
                 sh './mvnw clean package -DskipTests'
             }
         }
