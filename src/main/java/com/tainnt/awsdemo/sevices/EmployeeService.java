@@ -1,6 +1,8 @@
 package com.tainnt.awsdemo.sevices;
 
 import com.tainnt.awsdemo.daos.Employee;
+import com.tainnt.awsdemo.repositories.EmployeeRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -11,6 +13,8 @@ import java.util.List;
  */
 @Service
 public class EmployeeService {
+    @Autowired
+    private EmployeeRepo employeeRepo;
     public List<Employee> getListEmployee(){
 
         List<Employee> result = new ArrayList<>();
@@ -25,6 +29,10 @@ public class EmployeeService {
         result.add(employeeFirst);
         result.add(employeeSecond);
 
+        List<Employee> list = employeeRepo.findAll();
+        if (!list.isEmpty()) {
+            return list;
+        }
         return result;
     }
 }
