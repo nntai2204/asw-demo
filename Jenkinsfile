@@ -17,9 +17,12 @@ pipeline {
 
         stage('Copy .jar to remote') {
             steps {
-                sh 'scp target/aws-demo-0.0.1-SNAPSHOT.jar vm1@192.168.1.186:/home/vm1/aws-demo.jar'
+                sshagent(['jenkins-ssh-key']) {
+                    sh 'scp target/aws-demo-0.0.1-SNAPSHOT.jar vm1@192.168.1.186:/home/vm1/aws-demo.jar'
+                }
             }
         }
+
 
         stage('Restart remote server') {
             steps {
