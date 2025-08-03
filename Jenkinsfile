@@ -57,7 +57,7 @@ pipeline {
                     sh """
                         ssh vm1@${env.TARGET_IP} <<EOF
                         echo "Restarting aws-demo.service ..."
-                        systemctl stop aws-demo.service
+                        sudo systemctl restart aws-demo.service
                         echo "Service restarted."
 EOF
                     """
