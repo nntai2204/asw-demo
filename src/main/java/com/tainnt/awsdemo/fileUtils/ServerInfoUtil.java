@@ -16,7 +16,7 @@ public class ServerInfoUtil {
             while (addresses.hasMoreElements()) {
                 InetAddress addr = addresses.nextElement();
                 if (!addr.isLoopbackAddress() && addr instanceof Inet4Address) {
-                    return addr.getHostAddress();
+                    return "IP: " + addr.getHostAddress();
                 }
             }
         } catch (SocketException e) {
