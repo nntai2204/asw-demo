@@ -18,7 +18,7 @@ public class FileController {
     public String writeFile(@RequestBody FileRequest content) {
         FileWriteExample.writeToFile(
                 content.getFileName(), content.getData());
-        return "Đã ghi vào file!";
+        return "Write file! ";
     }
 
     @PostMapping("/read")
