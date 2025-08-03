@@ -54,13 +54,15 @@ pipeline {
         stage('Restart remote service') {
             steps {
                 sshagent(['jenkins-ssh-key']) {
-                    sh """
-                        ssh vm1@${env.TARGET_IP} <<EOF
-                        echo "Restarting aws-demo.service ..."
-                        sudo systemctl restart aws-demo.service
-                        echo "Service restarted."
+                    withCredentials([string(credentialsId: 'VM1_SUDO_PASSWORD', variable: 'SUDO_PASS')]) {
+                        sh """
+                            ssh vm1@${env.TARGET_IP} <<EOF
+                            echo "Restarting aws-demo.service ..."
+                            echo "\$SUDO_PASS" | sudo -S systemctl restart aws-demo.service
+                            echo "Service restarted."
 EOF
-                    """
+                        """
+                    }
                 }
             }
         }
