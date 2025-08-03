@@ -1,6 +1,11 @@
 pipeline {
     agent any
-
+    
+    environment {
+        // Gán secret vào biến môi trường
+        DB_PASSWORD = credentials('DB_PASSWORD_SECRET')
+    }
+    
     stages {
         stage('Checkout code') {
             steps {
@@ -30,7 +35,7 @@ pipeline {
                         pkill -f aws-demo.jar || true
 
                         echo "=== Starting new process..."
-                        nohup java -jar /home/vm1/aws-demo.jar > /home/vm1/aws-demo.log 2>&1 &
+                        nohup DB_PASSWORD=${DB_PASSWORD} java -jar /home/vm1/aws-demo.jar > /home/vm1/aws-demo.log 2>&1 &
                         echo "=== Process started ==="
 EOF
                     '''
