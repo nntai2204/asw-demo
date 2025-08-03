@@ -51,17 +51,14 @@ pipeline {
             }
         }
 
-        stage('Restart remote server') {
+        stage('Restart remote service') {
             steps {
                 sshagent(['jenkins-ssh-key']) {
                     sh """
                         ssh vm1@${env.TARGET_IP} <<EOF
-                        echo "=== Killing old process..."
-                        pkill -f aws-demo.jar || true
-
-                        echo "=== Starting new process..."
-                        nohup java -DDB_PASSWORD=${DB_PASSWORD} -jar /home/vm1/aws-demo.jar > /home/vm1/aws-demo.log 2>&1 &
-                        echo "=== Process started ==="
+                        echo "Restarting aws-demo.service ..."
+                        sudo systemctl restart aws-demo.service
+                        echo "Service restarted."
 EOF
                     """
                 }
