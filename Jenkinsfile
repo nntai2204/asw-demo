@@ -39,7 +39,7 @@ pipeline {
                         pkill -f aws-demo.jar || true
 
                         echo "=== Starting new process..."
-                        nohup DB_PASSWORD=${DB_PASSWORD} java -jar /home/vm1/aws-demo.jar > /home/vm1/aws-demo.log 2>&1 &
+                        nohup java -DDB_PASSWORD=${DB_PASSWORD} -jar /home/vm1/aws-demo.jar > /home/vm1/aws-demo.log 2>&1 &
                         echo "=== Process started ==="
 EOF
                     """
