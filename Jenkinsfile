@@ -22,13 +22,11 @@ pipeline {
         stage('Chọn IP') {
             steps {
                 script {
-                    // Nếu có nhập tay thì dùng IP đó, ngược lại dùng IP trong dropdown
                     if (params.CUSTOM_IP?.trim()) {
                         env.TARGET_IP = params.CUSTOM_IP.trim()
                     } else {
                         env.TARGET_IP = params.CHOICE_IP
                     }
-
                     echo "Sử dụng IP: ${env.TARGET_IP}"
                 }
             }
@@ -66,6 +64,32 @@ pipeline {
                         echo "=== Process started ==="
 EOF
                     """
+                }
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                sshagent(['jenkins-ssh-key']) {
+                    script {
+                        echo "Chờ 10 giây cho service khởi động..."
+                        sleep time: 10, unit: 'SECONDS'
+
+                        echo "Thực hiện kiểm tra sức khỏe..."
+                        def health = sh(
+                            script: """
+                                ssh vm1@${env.TARGET_IP} \\
+                                'curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health'
+                            """,
+                            returnStdout: true
+                        ).trim()
+
+                        if (health != "200") {
+                            error "⚠️ Health check thất bại! Service trả về mã HTTP: ${health}"
+                        } else {
+                            echo "✅ Health check thành công!"
+                        }
+                    }
                 }
             }
         }
