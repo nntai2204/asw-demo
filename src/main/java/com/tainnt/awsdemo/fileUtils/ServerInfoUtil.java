@@ -5,23 +5,23 @@ import java.util.Enumeration;
 
 public class ServerInfoUtil {
     public static String getLocalIp() {
+        String defaultIp = "9.9.9.9";
         try {
-            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                NetworkInterface ni = interfaces.nextElement();
-                if (!ni.isUp() || ni.isLoopback() || ni.isVirtual()) continue;
+            NetworkInterface netInterface = NetworkInterface.getByName("enp0s3");
+            if (netInterface == null) {
+                return defaultIp;
+            }
 
-                Enumeration<InetAddress> addresses = ni.getInetAddresses();
-                while (addresses.hasMoreElements()) {
-                    InetAddress addr = addresses.nextElement();
-                    if (addr instanceof Inet4Address && !addr.isLoopbackAddress() && !addr.isLinkLocalAddress()) {
-                        return addr.getHostAddress(); // ✅ IP hợp lệ
-                    }
+            Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
+            while (addresses.hasMoreElements()) {
+                InetAddress addr = addresses.nextElement();
+                if (!addr.isLoopbackAddress() && addr instanceof Inet4Address) {
+                    return addr.getHostAddress();
                 }
             }
         } catch (SocketException e) {
             e.printStackTrace();
         }
-        return "Không tìm thấy IP hợp lệ";
+        return defaultIp;
     }
 }
