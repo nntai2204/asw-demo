@@ -1,6 +1,15 @@
 pipeline {
     agent any
+    environment {
+        // Gán secret vào biến môi trường
+        DB_PASSWORD = credentials('DB_PASSWORD_SECRET')
+    }
+    
 
+    parameters {
+        string(name: 'REMOTE_IP', defaultValue: '192.168.1.186', description: 'Remote server IP')
+    }
+  
     stages {
         stage('Checkout code') {
             steps {
@@ -17,19 +26,23 @@ pipeline {
 
         stage('Copy .jar to remote') {
             steps {
-                sh 'scp target/aws-demo-0.0.1-SNAPSHOT.jar vm1@192.168.1.186:/home/vm1/aws-demo.jar'
+                sh "scp target/aws-demo-0.0.1-SNAPSHOT.jar vm1@${params.REMOTE_IP}:/home/vm1/aws-demo.jar"
             }
         }
 
         stage('Restart remote server') {
             steps {
                 sshagent(['jenkins-ssh-key']) {
-                    sh '''
-                    ssh vm1@192.168.1.186 '
+                    sh """
+                        ssh vm1@${params.REMOTE_IP} <<EOF
+                        echo "=== Killing old process..."
                         pkill -f aws-demo.jar || true
-                        nohup java -jar /home/vm1/aws-demo.jar > /home/vm1/aws-demo.log 2>&1 &
-                    '
-                    '''
+
+                        echo "=== Starting new process..."
+                        nohup java -DDB_PASSWORD=${DB_PASSWORD} -jar /home/vm1/aws-demo.jar > /home/vm1/aws-demo.log 2>&1 &
+                        echo "=== Process started ==="
+EOF
+                    """
                 }
             }
         }
