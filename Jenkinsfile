@@ -1,16 +1,39 @@
 pipeline {
     agent any
+
     environment {
-        // Gán secret vào biến môi trường
         DB_PASSWORD = credentials('DB_PASSWORD_SECRET')
     }
-    
 
     parameters {
-        string(name: 'REMOTE_IP', defaultValue: '192.168.1.186', description: 'Remote server IP')
+        choice(
+            name: 'CHOICE_IP',
+            choices: ['192.168.1.186', '192.168.1.136'],
+            description: 'Chọn IP từ danh sách (hoặc để trống nếu muốn nhập IP thủ công)'
+        )
+        string(
+            name: 'CUSTOM_IP',
+            defaultValue: '',
+            description: 'Nhập IP nếu không dùng danh sách trên (để trống nếu đã chọn ở trên)'
+        )
     }
-  
+
     stages {
+        stage('Chọn IP') {
+            steps {
+                script {
+                    // Nếu có nhập tay thì dùng IP đó, ngược lại dùng IP trong dropdown
+                    if (params.CUSTOM_IP?.trim()) {
+                        env.TARGET_IP = params.CUSTOM_IP.trim()
+                    } else {
+                        env.TARGET_IP = params.CHOICE_IP
+                    }
+
+                    echo "Sử dụng IP: ${env.TARGET_IP}"
+                }
+            }
+        }
+
         stage('Checkout code') {
             steps {
                 git branch: 'main', url: 'git@github.com:nntai2204/asw-demo.git'
@@ -26,7 +49,7 @@ pipeline {
 
         stage('Copy .jar to remote') {
             steps {
-                sh "scp target/aws-demo-0.0.1-SNAPSHOT.jar vm1@${params.REMOTE_IP}:/home/vm1/aws-demo.jar"
+                sh "scp target/aws-demo-0.0.1-SNAPSHOT.jar vm1@${env.TARGET_IP}:/home/vm1/aws-demo.jar"
             }
         }
 
@@ -34,7 +57,7 @@ pipeline {
             steps {
                 sshagent(['jenkins-ssh-key']) {
                     sh """
-                        ssh vm1@${params.REMOTE_IP} <<EOF
+                        ssh vm1@${env.TARGET_IP} <<EOF
                         echo "=== Killing old process..."
                         pkill -f aws-demo.jar || true
 
